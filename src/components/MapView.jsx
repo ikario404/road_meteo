@@ -22,6 +22,7 @@ export default function MapView({
     onWeatherLoaded,
     loading,
     highlightedPoint,
+    departureTime,
 }) {
     const mapRef = useRef(null);
     const mapInstanceRef = useRef(null);
@@ -179,7 +180,7 @@ export default function MapView({
                 else if (totalDistKm < 150) interval = 20;
                 else if (totalDistKm > 500) interval = 50;
 
-                const samplePoints = sampleRoutePoints(coords, interval, route.duration);
+                const samplePoints = sampleRoutePoints(coords, interval, route.duration, departureTime ? new Date(departureTime) : null);
 
                 // Fetch weather for all points
                 const weatherResults = await fetchWeatherForPoints(samplePoints);
