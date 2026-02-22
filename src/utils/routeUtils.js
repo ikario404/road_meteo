@@ -21,20 +21,29 @@ function haversineDistance(lat1, lng1, lat2, lng2) {
 }
 
 /**
- * Sample evenly-spaced points along a route polyline
+ * Sample evenly-spaced points along a route polyline, with estimated arrival times.
  * @param {Array<{lat: number, lng: number}>} coords - Route coordinates
  * @param {number} intervalKm - Distance between sample points (default 30 km)
- * @returns {Array<{lat: number, lng: number, distanceKm: number}>}
+ * @param {number} totalDurationSeconds - Total route duration from OSRM (seconds)
+ * @param {Date} [departureTime] - Departure time (defaults to now)
+ * @returns {Array<{lat: number, lng: number, distanceKm: number, estimatedArrivalTime: string, etaOffsetSeconds: number}>}
  */
-export function sampleRoutePoints(coords, intervalKm = 30) {
+export function sampleRoutePoints(coords, intervalKm = 30, totalDurationSeconds = 0, departureTime = null) {
     if (!coords || coords.length < 2) return [];
 
+    const departure = departureTime || new Date();
     const points = [];
     let accumulatedDist = 0;
     let nextSampleDist = 0;
 
     // Always include the start point
-    points.push({ lat: coords[0].lat, lng: coords[0].lng, distanceKm: 0 });
+    points.push({
+        lat: coords[0].lat,
+        lng: coords[0].lng,
+        distanceKm: 0,
+        estimatedArrivalTime: departure.toISOString(),
+        etaOffsetSeconds: 0,
+    });
 
     for (let i = 1; i < coords.length; i++) {
         const segmentDist = haversineDistance(
@@ -52,7 +61,8 @@ export function sampleRoutePoints(coords, intervalKm = 30) {
             const ratio = (nextSampleDist - prevAccum) / segmentDist;
             const lat = coords[i - 1].lat + ratio * (coords[i].lat - coords[i - 1].lat);
             const lng = coords[i - 1].lng + ratio * (coords[i].lng - coords[i - 1].lng);
-            points.push({ lat, lng, distanceKm: Math.round(nextSampleDist) });
+            const distKm = Math.round(nextSampleDist);
+            points.push({ lat, lng, distanceKm: distKm });
         }
     }
 
@@ -63,7 +73,28 @@ export function sampleRoutePoints(coords, intervalKm = 30) {
         points.push({ lat: lastCoord.lat, lng: lastCoord.lng, distanceKm: totalDist });
     }
 
+    // Compute estimated arrival time for each point based on distance ratio
+    const totalDistKm = accumulatedDist || 1; // avoid division by zero
+    for (let i = 0; i < points.length; i++) {
+        if (points[i].estimatedArrivalTime) continue; // skip start point (already set)
+        const ratio = points[i].distanceKm / totalDistKm;
+        const offsetSeconds = Math.round(ratio * totalDurationSeconds);
+        const eta = new Date(departure.getTime() + offsetSeconds * 1000);
+        points[i].estimatedArrivalTime = eta.toISOString();
+        points[i].etaOffsetSeconds = offsetSeconds;
+    }
+
     return points;
+}
+
+/**
+ * Format an ISO time string or Date to "HH:MM" in local timezone
+ * @param {string|Date} isoOrDate
+ * @returns {string}
+ */
+export function formatTime(isoOrDate) {
+    const d = typeof isoOrDate === 'string' ? new Date(isoOrDate) : isoOrDate;
+    return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 }
 
 /**

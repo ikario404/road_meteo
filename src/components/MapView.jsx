@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { sampleRoutePoints, getWeatherInfo, getWindDirection } from '../utils/routeUtils';
+import { sampleRoutePoints, getWeatherInfo, getWindDirection, formatTime } from '../utils/routeUtils';
 import { fetchWeatherForPoints } from '../services/weatherService';
 import { reverseGeocode } from '../services/geocodingService';
 
@@ -179,15 +179,17 @@ export default function MapView({
                 else if (totalDistKm < 150) interval = 20;
                 else if (totalDistKm > 500) interval = 50;
 
-                const samplePoints = sampleRoutePoints(coords, interval);
+                const samplePoints = sampleRoutePoints(coords, interval, route.duration);
 
                 // Fetch weather for all points
                 const weatherResults = await fetchWeatherForPoints(samplePoints);
 
-                // Merge distance info
+                // Merge distance + ETA info
                 const enrichedWeather = weatherResults.map((w, i) => ({
                     ...w,
                     distanceKm: samplePoints[i]?.distanceKm || 0,
+                    estimatedArrivalTime: samplePoints[i]?.estimatedArrivalTime || null,
+                    etaOffsetSeconds: samplePoints[i]?.etaOffsetSeconds || 0,
                 }));
 
                 // Reverse geocode point names (sequential with delay to respect Nominatim rate limits)
@@ -216,6 +218,7 @@ export default function MapView({
                     });
 
                     const marker = L.marker([w.lat, w.lng], { icon }).addTo(markersLayerRef.current);
+                    const etaLabel = w.estimatedArrivalTime ? formatTime(w.estimatedArrivalTime) : '';
                     marker.bindPopup(`
             <div class="popup-weather">
               <div class="popup-weather__icon">${weather.emoji}</div>
@@ -232,6 +235,7 @@ export default function MapView({
               <div style="margin-top:6px;font-size:0.7rem;color:#a0a0b8;">
                 📍 ${w.locationName} — km ${w.distanceKm}
               </div>
+              ${etaLabel ? `<div style="margin-top:4px;font-size:0.75rem;color:#8bb4f0;">🕐 Arrivée estimée : ${etaLabel}</div>` : ''}
             </div>
           `);
 

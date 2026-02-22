@@ -1,4 +1,4 @@
-import { getWeatherInfo, analyzeRouteWeather, getWindDirection } from '../utils/routeUtils';
+import { getWeatherInfo, analyzeRouteWeather, getWindDirection, formatTime } from '../utils/routeUtils';
 
 export default function WeatherPanel({ weatherData, onPointHover }) {
     if (!weatherData || weatherData.length === 0) return null;
@@ -15,7 +15,10 @@ export default function WeatherPanel({ weatherData, onPointHover }) {
     return (
         <div className="weather-panel glass-panel">
             <div className="weather-panel__title">
-                🌤️ Météo sur le trajet
+                🌤️ Météo projetée sur le trajet
+                <div style={{ fontSize: '0.7rem', opacity: 0.6, marginTop: '2px', fontWeight: 400 }}>
+                    Prévisions ajustées selon votre heure d'arrivée estimée
+                </div>
             </div>
 
             {/* Alerts */}
@@ -70,7 +73,12 @@ export default function WeatherPanel({ weatherData, onPointHover }) {
                             </div>
                         </div>
                         <div className="weather-point__km">
-                            km {point.distanceKm || 0}
+                            <div>km {point.distanceKm || 0}</div>
+                            {point.estimatedArrivalTime && (
+                                <div style={{ fontSize: '0.7rem', color: '#8bb4f0', marginTop: '2px' }}>
+                                    🕐 ~{formatTime(point.estimatedArrivalTime)}
+                                </div>
+                            )}
                         </div>
                     </div>
                 );
