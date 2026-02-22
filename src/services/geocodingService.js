@@ -3,10 +3,7 @@
  * Free, no API key required
  */
 
-// In dev mode, use the Vite proxy to avoid CORS issues
-// In production, call Nominatim directly
-const isDev = import.meta.env.DEV;
-const NOMINATIM_URL = isDev ? '/nominatim' : 'https://nominatim.openstreetmap.org';
+const NOMINATIM_URL = 'https://nominatim.openstreetmap.org';
 
 /**
  * Search for addresses matching a query
