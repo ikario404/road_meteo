@@ -23,6 +23,11 @@ dist-ssr
 *.sln
 *.sw?
 
-# Capacitor / Android
-android/
-app-debug.apk
+# Capacitor / Android build outputs
+android/app/build/
+android/.gradle/
+android/build/
+android/capacitor-android/build/
+android/capacitor-cordova-android-plugins/build/
+android/local.properties
+*.apk

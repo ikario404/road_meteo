@@ -45,8 +45,8 @@ jobs:
 
       - name: Rename APK
         run: |
-          VERSION=${GITHUB_REF_NAME}
-          cp android/app/build/outputs/apk/debug/app-debug.apk road-meteo-${VERSION}.apk
+          VERSION=$(node -p "require('./package.json').version")
+          cp android/app/build/outputs/apk/debug/app-debug.apk road-meteo-v${VERSION}.apk
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
