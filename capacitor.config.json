@@ -1,0 +1,8 @@
+{
+  "appId": "com.roadmeteo.app",
+  "appName": "Road Meteo",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  }
+}
