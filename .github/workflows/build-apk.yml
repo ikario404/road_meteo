@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - uses: actions/checkout@v4
@@ -15,7 +17,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Setup Java
@@ -32,9 +34,6 @@ jobs:
 
       - name: Build webapp
         run: npm run build
-
-      - name: Add Android platform
-        run: npx cap add android
 
       - name: Sync Capacitor
         run: npx cap sync android

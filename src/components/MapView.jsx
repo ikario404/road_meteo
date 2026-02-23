@@ -15,6 +15,13 @@ L.Icon.Default.mergeOptions({
 
 const OSRM_URL = 'https://router.project-osrm.org/route/v1/driving';
 
+// Escape HTML to prevent XSS in Leaflet popups
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
 export default function MapView({
     origin,
     destination,
@@ -81,7 +88,7 @@ export default function MapView({
                 className: '',
             });
             originMarkerRef.current = L.marker([origin.lat, origin.lng], { icon }).addTo(map);
-            originMarkerRef.current.bindPopup(`<b>Départ</b><br/>${origin.name || ''}`);
+            originMarkerRef.current.bindPopup(`<b>Départ</b><br/>${escapeHtml(origin.name || '')}`);
         }
     }, [origin]);
 
@@ -103,7 +110,7 @@ export default function MapView({
                 className: '',
             });
             destMarkerRef.current = L.marker([destination.lat, destination.lng], { icon }).addTo(map);
-            destMarkerRef.current.bindPopup(`<b>Arrivée</b><br/>${destination.name || ''}`);
+            destMarkerRef.current.bindPopup(`<b>Arrivée</b><br/>${escapeHtml(destination.name || '')}`);
         }
     }, [destination]);
 
@@ -160,8 +167,12 @@ export default function MapView({
                 );
                 routeLayerRef.current.addLayer(glowLine);
 
-                // Fit bounds
-                map.fitBounds(polyline.getBounds(), { padding: [80, 400] });
+                // Fit bounds (responsive padding for mobile vs desktop panel)
+                const isMobile = window.innerWidth < 768;
+                map.fitBounds(polyline.getBounds(), {
+                    padding: isMobile ? [50, 50] : [60, 340],
+                    maxZoom: 14,
+                });
 
                 // Report route info
                 onRouteCalculated({
@@ -234,7 +245,7 @@ export default function MapView({
                 <span>🌧️ ${w.precipitation} mm</span>
               </div>
               <div style="margin-top:6px;font-size:0.7rem;color:#a0a0b8;">
-                📍 ${w.locationName} — km ${w.distanceKm}
+              📍 ${escapeHtml(w.locationName || '')} — km ${w.distanceKm}
               </div>
               ${etaLabel ? `<div style="margin-top:4px;font-size:0.75rem;color:#8bb4f0;">🕐 Arrivée estimée : ${etaLabel}</div>` : ''}
             </div>

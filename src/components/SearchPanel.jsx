@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { searchAddress } from '../services/geocodingService';
+import { searchAddress, reverseGeocode } from '../services/geocodingService';
 import { formatDistance, formatDuration } from '../utils/routeUtils';
 
 let debounceTimer = null;
@@ -26,6 +26,40 @@ export default function SearchPanel({
     const [showDestSuggestions, setShowDestSuggestions] = useState(false);
     const originRef = useRef(null);
     const destRef = useRef(null);
+    const [geolocating, setGeolocating] = useState(false);
+
+    const handleGeolocate = useCallback(async () => {
+        if (!navigator.geolocation) {
+            alert('La géolocalisation n\'est pas supportée par votre navigateur.');
+            return;
+        }
+        setGeolocating(true);
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                try {
+                    const { latitude, longitude } = position.coords;
+                    const result = await reverseGeocode(latitude, longitude);
+                    const name = result?.shortName || result?.displayName || `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+                    setOriginText(name);
+                    onOriginChange({ lat: latitude, lng: longitude, name });
+                } catch (err) {
+                    console.error('Reverse geocode error:', err);
+                    alert('Impossible de déterminer votre adresse.');
+                } finally {
+                    setGeolocating(false);
+                }
+            },
+            (err) => {
+                setGeolocating(false);
+                if (err.code === err.PERMISSION_DENIED) {
+                    alert('Permission de géolocalisation refusée.');
+                } else {
+                    alert('Impossible d\'obtenir votre position.');
+                }
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
+    }, [onOriginChange]);
 
     const debouncedSearch = useCallback((query, setter, showSetter) => {
         clearTimeout(debounceTimer);
@@ -130,16 +164,27 @@ export default function SearchPanel({
                         <span className="input-group__dot input-group__dot--start"></span>
                         Départ
                     </label>
-                    <input
-                        id="input-origin"
-                        type="text"
-                        className="input-group__input"
-                        placeholder="Entrez une adresse de départ..."
-                        value={originText}
-                        onChange={handleOriginInput}
-                        onFocus={() => originSuggestions.length > 0 && setShowOriginSuggestions(true)}
-                        autoComplete="off"
-                    />
+                    <div className="origin-input-row">
+                        <input
+                            id="input-origin"
+                            type="text"
+                            className="input-group__input"
+                            placeholder="Entrez une adresse de départ..."
+                            value={originText}
+                            onChange={handleOriginInput}
+                            onFocus={() => originSuggestions.length > 0 && setShowOriginSuggestions(true)}
+                            autoComplete="off"
+                        />
+                        <button
+                            className={`geolocate-btn ${geolocating ? 'geolocate-btn--loading' : ''}`}
+                            onClick={handleGeolocate}
+                            disabled={geolocating}
+                            title="Utiliser ma position"
+                            type="button"
+                        >
+                            {geolocating ? '⏳' : '📍'}
+                        </button>
+                    </div>
                     {showOriginSuggestions && (
                         <div className="suggestions">
                             {originSuggestions.map((s, i) => (

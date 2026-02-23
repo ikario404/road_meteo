@@ -277,6 +277,60 @@ body {
   font-style: italic;
 }
 
+/* --- Geolocation Button --- */
+.origin-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.origin-input-row .input-group__input {
+  flex: 1;
+}
+
+.geolocate-btn {
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.geolocate-btn:hover:not(:disabled) {
+  background: rgba(34, 211, 238, 0.12);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.3);
+}
+
+.geolocate-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.geolocate-btn--loading {
+  animation: pulse-glow 1s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 4px rgba(34, 211, 238, 0.2);
+  }
+
+  50% {
+    box-shadow: 0 0 16px rgba(34, 211, 238, 0.5);
+  }
+}
+
 .input-group__input {
   width: 100%;
   padding: 12px 16px;
