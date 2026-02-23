@@ -160,8 +160,12 @@ export default function MapView({
                 );
                 routeLayerRef.current.addLayer(glowLine);
 
-                // Fit bounds
-                map.fitBounds(polyline.getBounds(), { padding: [80, 400] });
+                // Fit bounds (responsive padding for mobile vs desktop panel)
+                const isMobile = window.innerWidth < 768;
+                map.fitBounds(polyline.getBounds(), {
+                    padding: isMobile ? [50, 50] : [60, 340],
+                    maxZoom: 14,
+                });
 
                 // Report route info
                 onRouteCalculated({
