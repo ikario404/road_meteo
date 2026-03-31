@@ -90,4 +90,4 @@ Toutes les APIs sont **gratuites et sans clé** :
 
 ## 📄 Licence
 
-MIT
+[MIT](LICENSE)
