@@ -10,11 +10,11 @@ def appVersionCode = (versionParts[0] as int) * 10000 +
 
 // Optional signing: if keystore env vars are set (CI), sign the APK.
 // If not (F-Droid build servers), produce an unsigned release APK.
-def keystorePath = System.getenv("KEYSTORE_FILE")
-def keystorePassword = System.getenv("KEYSTORE_PASSWORD")
-def keyAlias = System.getenv("KEY_ALIAS")
-def keyPassword = System.getenv("KEY_PASSWORD")
-def hasSigningConfig = keystorePath != null && keystorePassword != null && keyAlias != null && keyPassword != null
+def envKeystorePath = System.getenv("KEYSTORE_FILE")
+def envKeystorePass = System.getenv("KEYSTORE_PASSWORD")
+def envKeyAlias = System.getenv("KEY_ALIAS")
+def envKeyPass = System.getenv("KEY_PASSWORD")
+def hasSigningConfig = envKeystorePath != null && envKeystorePass != null && envKeyAlias != null && envKeyPass != null
 
 android {
     namespace = "com.roadmeteo.app"
@@ -36,10 +36,10 @@ android {
     if (hasSigningConfig) {
         signingConfigs {
             release {
-                storeFile file(keystorePath)
-                storePassword keystorePassword
-                keyAlias keyAlias
-                keyPassword keyPassword
+                storeFile file(envKeystorePath)
+                storePassword envKeystorePass
+                keyAlias envKeyAlias
+                keyPassword envKeyPass
             }
         }
     }
