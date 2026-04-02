@@ -38,14 +38,28 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
-      - name: Build APK
+      - name: Decode Keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/road-meteo.jks
+
+      - name: Build Release APK
         working-directory: android
-        run: ./gradlew assembleDebug
+        env:
+          KEYSTORE_FILE: road-meteo.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: ./gradlew assembleRelease
 
       - name: Rename APK
         run: |
           VERSION=$(node -p "require('./package.json').version")
-          cp android/app/build/outputs/apk/debug/app-debug.apk road-meteo-v${VERSION}.apk
+          # Signed APK (if keystore secrets are configured)
+          if [ -f android/app/build/outputs/apk/release/app-release.apk ]; then
+            cp android/app/build/outputs/apk/release/app-release.apk road-meteo-v${VERSION}.apk
+          # Unsigned APK (fallback)
+          elif [ -f android/app/build/outputs/apk/release/app-release-unsigned.apk ]; then
+            cp android/app/build/outputs/apk/release/app-release-unsigned.apk road-meteo-v${VERSION}.apk
+          fi
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

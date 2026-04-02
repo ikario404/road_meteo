@@ -1,0 +1,5 @@
+- Prévisions météo le long de votre itinéraire avec détail point par point
+- Calcul d'itinéraire avec distance et durée estimée
+- Alertes météo pour pluie, neige, verglas, brouillard et vents forts
+- Marqueurs météo interactifs sur la carte avec popups détaillés
+- Thème sombre avec design glassmorphism

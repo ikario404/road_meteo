@@ -31,3 +31,8 @@ android/capacitor-android/build/
 android/capacitor-cordova-android-plugins/build/
 android/local.properties
 *.apk
+
+# Keystore (never commit signing keys!)
+*.jks
+*.b64
+*.keystore

@@ -1,0 +1,5 @@
+- Weather forecast along your route with detailed point-by-point breakdown
+- Route calculation with distance and estimated duration
+- Weather alerts for rain, snow, ice, fog and strong winds
+- Interactive weather markers on the map with detailed popups
+- Dark theme with glassmorphism design
